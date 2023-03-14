@@ -1,0 +1,17 @@
+version: '3.7'
+services:
+  ingenapp-client01:
+#    build: .
+    image: 267486655460.dkr.ecr.us-east-1.amazonaws.com/igw-dev-angular:latest
+    container_name: ingenapp-dev
+    volumes:
+      - igwapp-files:/usr/share/nginx/html/
+    ports:
+      - 80:80
+      - 443:443
+    networks:
+      - igw-network
+networks:
+  igw-network:
+volumes:
+  igwapp-files:

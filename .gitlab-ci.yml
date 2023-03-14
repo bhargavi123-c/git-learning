@@ -1,0 +1,50 @@
+stages:
+    - build
+    - deploy
+variables:
+    docker_registry: 267486655460.dkr.ecr.us-east-1.amazonaws.com
+    image_tag: igw-dev-angular:latest
+    
+build:
+    stage: build
+    before_script:
+        - aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin $docker_registry
+    script:
+        - whoami
+        - aws --version
+        - docker --version
+        - docker info
+        - docker build -t $docker_registry/$image_tag .
+    after_script:
+        - docker images
+        - docker push $docker_registry/$image_tag
+        - docker system prune -f
+    only:
+        - dev
+    tags:
+        - localrunner
+        - localshell
+
+deploy_dev:
+    stage: deploy
+    only:
+        refs:
+            - dev
+    before_script:
+        - docker-compose version
+    script:
+        - docker-compose down -v
+        - docker-compose up -d
+    after_script:
+        - docker-compose ps
+        - docker-compose logs
+    when: manual
+    tags:
+        - localrunner
+        - localshell
+#    artifacts:
+#        when: always
+#        expire_in: 10 days
+#        paths:
+#            - salesdashboard//:
+
